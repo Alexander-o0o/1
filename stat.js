@@ -1,83 +1,96 @@
 /* eslint-disable require-jsdoc */
-console.log('stat')
-window.renderStatistics = function(ctx, names, times) {
-  // var canvas = this.document.getElementsByTagName('canvas')[0];
-  // var ctx = canvas.getContext('2d');
-  drawStatisticsBG(drawCloud, ctx)
-  drawMultiLineText(220, 100, '16px PT Mono', 24, ctx,
-      'Ура вы победили!\nСписок результатов:')
-  if (times.length > 0) {
-    drawColumnChart(120, 270, 385, 100, ctx, times, names)
-  }
-}
-function drawStatisticsBG(draw, ctx) {
-  draw(150, 290, 'rgba(0, 0, 0, 0.7)', ctx)
-  draw(140, 280, 'white', ctx)
-}
-function drawCloud(x, y, color, ctx) {
-  ctx.fillStyle = color
-  ctx.beginPath()
-  ctx.moveTo(x, y)
-  ctx.bezierCurveTo(x - 40, y - 20, x - 20, y - 140, x + 60, y - 110)
-  ctx.bezierCurveTo(x + 20, y - 200, x + 140, y - 230, x + 170, y - 180)
-  ctx.bezierCurveTo(x + 240, y - 240, x + 310, y - 160, x + 280, y - 110)
-  ctx.bezierCurveTo(x + 380, y - 130, x + 380, y - 20, x + 340, y)
-  ctx.closePath()
-  ctx.fill()
-}
-
-function drawMultiLineText(x, y, font, lineHeight, ctx, text) {
-  ctx.fillStyle = 'black'
-  ctx.font = font
-  const nlChar = '\n'
-  let lastNl
-  let nl = -1
-  let i = 0
-  while (nl < text.length) {
-    lastNl = nl
-    nl = text.indexOf(nlChar, nl + 1)
-    if (nl === -1) {
-      nl = text.length
+(function() {
+  window.renderStatistics = function(ctx, names, times) {
+    const x = 100
+    const y = 10
+    const width = 420
+    const height = 270
+    const chartWidth = width * 0.80
+    const charHeight = height * 0.65
+    drawStatisticsBG(ctx, x, y, width, height, drawCloud)
+    drawMultilineText(ctx, x + width * 0.25, y + height * 0.10,
+        'black', '16px PT Mono', 24,
+        'Ура вы победили!\nСписок результатов:')
+    if (times.length > 0) {
+      drawStatisticsChart(ctx,
+          x + (width - chartWidth) / 2,
+          y + (height - charHeight) / 2 + width * 0.05,
+          chartWidth, charHeight, times, names)
     }
-    ctx.fillText(text.substring(lastNl + 1, nl), x, y + (lineHeight * ++i))
   }
-}
-function drawColumnChart(x, y, width, height, ctx, values, lables) {
-  let columnColor
-  const itemWidth = width / (values.length || 1)
-  const maxValue = values.length && values.sort((a, b) => a < b)[0]
-  let iX = x
-  for (let i = 0; i < values.length; i++) {
-    columnColor = 'hsl(' +
-          (lables[i] === 'Вы'
-            ? '0, 100'
-            : ('240, ' + Math.floor(Math.random() * 100))) +
+  function drawStatisticsBG(ctx, x, y, width, height, drawFunc) {
+    drawFunc(ctx, x + 10, y + 10, width, height, 'rgba(0, 0, 0, 0.7)')
+    drawFunc(ctx, x, y, width, height, 'white')
+  }
+  function drawCloud(ctx, x, y, width, height, color) {
+    const w = width
+    const h = height
+    ctx.fillStyle = color
+    ctx.beginPath()
+    ctx.moveTo(x + 0.05 * w, y + 1.00 * h)
+    // eslint-disable-next-line max-len
+    ctx.bezierCurveTo(x - 0.05 * w, y + 0.90 * h, x - 0.00 * w, y + 0.30 * h, x + 0.20 * w, y + 0.45 * h)
+    // eslint-disable-next-line max-len
+    ctx.bezierCurveTo(x + 0.10 * w, y + 0.00 * h, x + 0.40 * w, y - 0.15 * h, x + 0.50 * w, y + 0.10 * h)
+    // eslint-disable-next-line max-len
+    ctx.bezierCurveTo(x + 0.70 * w, y - 0.20 * h, x + 0.85 * w, y + 0.20 * h, x + 0.80 * w, y + 0.45 * h)
+    // eslint-disable-next-line max-len
+    ctx.bezierCurveTo(x + 1.05 * w, y + 0.35 * h, x + 1.05 * w, y + 0.90 * h, x + 0.95 * w, y + 1.00 * h)
+    ctx.closePath()
+    ctx.fill()
+  }
+  function drawMultilineText(ctx, x, y, color, font, lineHeight, text) {
+    ctx.fillStyle = color
+    ctx.font = font
+    const nlChar = '\n'
+    let lastNl
+    let nl = -1
+    let i = 0
+    while (nl < text.length) {
+      lastNl = nl
+      nl = text.indexOf(nlChar, nl + 1)
+      if (nl === -1) {
+        nl = text.length
+      }
+      ctx.fillText(text.substring(lastNl + 1, nl), x, y + (lineHeight * ++i))
+    }
+  }
+  function drawStatisticsChart(ctx, x, y, width, height, values, lables) {
+    let columnColor
+    const itemWidth = width / (values.length || 1)
+    const maxValue = values.length && values.sort((a, b) => a < b)[0]
+    let iX = x
+    for (let i = 0; i < values.length; i++) {
+      columnColor = 'hsl(' +
+        (lables[i] === 'Вы'
+          ? '0, 100'
+          : ('240, ' + Math.floor(Math.random() * 100))) +
         '%, 50%)'
-    columnChartDrawItem(iX, y, ctx, itemWidth, height,
-        columnColor, Math.floor(values[i]), maxValue, lables[i])
-    iX = iX + itemWidth
+      columnChartDrawItem(ctx, iX, y, itemWidth, height, columnColor,
+          Math.floor(values[i]), maxValue, lables[i])
+      iX = iX + itemWidth
+    }
   }
-}
-function columnChartDrawItem(x, y, ctx, itemWidth, itemHeight,
-    columnColor, value, maxValue, lable) {
-  const topLableHeight = 30
-  const bottomLableHeight = 30
-  const underLableGap = 5
-  const columnMaxHeight = itemHeight - topLableHeight - bottomLableHeight
-  const columnHeight = columnMaxHeight * (value / maxValue)
-  const cY = y - bottomLableHeight - columnHeight
-  const columnWidth = 40
-  const cX = x + (itemWidth - columnWidth) / 2
-  const lableFont = '16px PT Mono'
-  const tLy = cY - underLableGap
-  const tLx = cX
-  const bLy = y - underLableGap
-  const bLx = cX
-  ctx.font = lableFont
-  ctx.fillStyle = 'black'
-  ctx.fillText(value, tLx, tLy)
-  ctx.fillStyle = columnColor
-  ctx.fillRect(cX, cY, columnWidth, columnHeight)
-  ctx.fillStyle = 'black'
-  ctx.fillText(lable, bLx, bLy)
-}
+  function columnChartDrawItem(ctx, x, y, width, height, color,
+      value, maxValue, lable) {
+    const topLableHeight = 30
+    const bottomLableHeight = 30
+    const underLableGap = 5
+    const columnMaxHeight = height - topLableHeight - bottomLableHeight
+    const columnHeight = columnMaxHeight * (value / maxValue)
+    const columnY = y + height - bottomLableHeight - columnHeight
+    const columnWidth = 40
+    const columnX = x + (width - columnWidth) / 2
+    const topLableY = columnY - underLableGap
+    const topLableX = columnX
+    const bottomLableY = y + height - underLableGap
+    const bottomLableX = columnX
+    ctx.font = '16px PT Mono'
+    ctx.fillStyle = 'black'
+    ctx.fillText(value, topLableX, topLableY)
+    ctx.fillStyle = color
+    ctx.fillRect(columnX, columnY, columnWidth, columnHeight)
+    ctx.fillStyle = 'black'
+    ctx.fillText(lable, bottomLableX, bottomLableY)
+  }
+}())
