@@ -1,100 +1,117 @@
-main();
+/* eslint-disable require-jsdoc */
+main()
 
 function main() {
-  document.querySelector('.setup').classList.remove('hidden');
-  var wizards = createRandomWizards(4);
-  var wizardElements = [];
-  wizards.forEach(i => {
+  document.querySelector('.setup').classList.remove('hidden')
+  const wizards = createRandomWizards(4)
+  const wizardElements = []
+  wizards.forEach((i) => {
     wizardElements.push(createWizardElement(i))
-  });
-  var setupSimilarList = document.querySelector('.setup-similar-list');
-  appendChilds(setupSimilarList, wizardElements);
-  document.querySelector('.setup-similar').classList.remove('hidden');
+  })
+  const setupSimilarList = document.querySelector('.setup-similar-list')
+  appendChilds(setupSimilarList, wizardElements)
+  document.querySelector('.setup-similar').classList.remove('hidden')
 }
 
 function appendChilds(element, childs) {
-  var fragment = document.createDocumentFragment();
-  childs.forEach(i => {fragment.appendChild(i)});
-  element.appendChild(fragment);
+  const fragment = document.createDocumentFragment()
+  childs.forEach((i) => {fragment.appendChild(i)})
+  element.appendChild(fragment)
 }
 
 function createWizardElement(wizard) {
-  var mapType = {
+  const mapType = {
     PROPERTY: 1,
     ATTRIBUTE: 2,
-    STYLE: 3
+    STYLE: 3,
   }
-  var ObjectElementMap = [
-    {source: 'name',      selector: '.setup-similar-label', target: 'textContent', type: mapType.PROPERTY},
-    {source: 'coatColor', selector: '.wizard-coat',         target: 'fill',        type: mapType.ATTRIBUTE},
-    {source: 'eyesColor', selector: '.wizard-eyes',         target: 'fill',        type: mapType.ATTRIBUTE}
+  const ObjectElementMap = [
+    {
+      source: 'name',
+      selector: '.setup-similar-label',
+      target: 'textContent',
+      type: mapType.PROPERTY,
+    },
+    {
+      source: 'coatColor',
+      selector: '.wizard-coat',
+      target: 'fill',
+      type: mapType.ATTRIBUTE,
+    },
+    {
+      source: 'eyesColor',
+      selector: '.wizard-eyes',
+      target: 'fill',
+      type: mapType.ATTRIBUTE,
+    },
   ]
-  var template = document.querySelector('#similar-wizard-template').content.querySelector('div').cloneNode(true);
-  mapObjectOnElement(wizard, template, ObjectElementMap);
+  const template = document.querySelector('#similar-wizard-template')
+      .content.querySelector('div').cloneNode(true)
+  mapObjectOnElement(wizard, template, ObjectElementMap)
   function mapObjectOnElement(object, element, map) {
-    map.forEach(i => {
-      var e = element.querySelector(i.selector);
+    map.forEach((i) => {
+      const e = element.querySelector(i.selector)
       if (i.source in object && e) {
         switch (i.type) {
           case mapType.PROPERTY:
-            e[i.target] = object[i.source];
-            break;
+            e[i.target] = object[i.source]
+            break
           case mapType.ATTRIBUTE:
-            e.setAttribute(i.target, object[i.source]);
-            break;
+            e.setAttribute(i.target, object[i.source])
+            break
           case mapType.STYLE:
-            e.style += ' ' + i.target + ':' + object[i.source] + ';';    
-            break;
+            e.style += ' ' + i.target + ':' + object[i.source] + ';'
+            break
           default:
-            break;
+            break
         }
       }
-    });
+    })
   }
-  return template;
+  return template
 }
 
 function createRandomWizards(wizarsCount) {
-  var result = [];
-  for (var i = 0; i < wizarsCount; i++) {
-    result.push(createRandomWizard());
+  const result = []
+  for (let i = 0; i < wizarsCount; i++) {
+    result.push(createRandomWizard())
   }
-  return result;
+  return result
 }
 
 function createRandomWizard() {
   return {
     name: randomWizardName(),
     coatColor: randomCoatColor(),
-    eyesColor: randomEyesColor()
-  };
+    eyesColor: randomEyesColor(),
+  }
 }
 
 function randomEyesColor() {
-  var colors = [
+  const colors = [
     'black',
     'red',
     'blue',
     'yellow',
-    'green'
+    'green',
   ]
-  return getRandomArrayElement(colors);
+  return getRandomArrayElement(colors)
 }
 
 function randomCoatColor() {
-  var colors = [
+  const colors = [
     'rgb(101, 137, 164)',
     'rgb(241, 43, 107)',
     'rgb(146, 100, 161)',
     'rgb(56, 159, 117)',
     'rgb(215, 210, 55)',
-    'rgb(0, 0, 0)'
+    'rgb(0, 0, 0)',
   ]
-  return getRandomArrayElement(colors);
+  return getRandomArrayElement(colors)
 }
 
 function randomWizardName() {
-  var firstNames = [
+  const firstNames = [
     'Иван',
     'Хуан Себастьян',
     'Мария',
@@ -102,9 +119,9 @@ function randomWizardName() {
     'Виктор',
     'Юлия',
     'Люпита',
-    'Вашингтон'
+    'Вашингтон',
   ]
-  var surnames = [
+  const surnames = [
     'да Марья',
     'Верон',
     'Мирабелла',
@@ -112,13 +129,13 @@ function randomWizardName() {
     'Онопко',
     'Топольницкая',
     'Нионго',
-    'Ирвинг'
+    'Ирвинг',
   ]
-  var name = getRandomArrayElement(firstNames) + ' ' + getRandomArrayElement(surnames);
-  return name;
+  const name =
+      getRandomArrayElement(firstNames) + ' ' + getRandomArrayElement(surnames)
+  return name
 }
 
-
 function getRandomArrayElement(a) {
-  return a[Math.floor(Math.random() * a.length)];
+  return a[Math.floor(Math.random() * a.length)]
 }
