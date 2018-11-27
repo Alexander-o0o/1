@@ -1,7 +1,98 @@
 /* eslint-disable require-jsdoc */
-main()
+const key = {
+  ESC: 27,
+  ENTER: 13,
+}
+main1()
 
-function main() {
+function main1() {
+  document.querySelector('.setup-open')
+      .addEventListener('click', setupOpenClickHandler)
+
+  document.querySelector('.setup-open-icon')
+      .addEventListener('keydown', setupOpenIconKeydownHandler)
+
+  document.querySelector('.setup')
+      .addEventListener('keydown', setupKeydownHandler)
+
+  document.querySelector('.setup-close')
+      .addEventListener('click', setupCloseClickHandler)
+
+  document.querySelector('.setup-close')
+      .addEventListener('keydown', setupCloseKeydownkHandler)
+
+  document.querySelector('.setup-submit')
+      .addEventListener('click', setupSubmitClickHandler)
+
+  document.querySelector('.setup-submit')
+      .addEventListener('keydown', setupSubmitKeydownkHandler)
+}
+// реакции (начало)
+function setupOpenClickHandler(e) {
+  setupShow()
+}
+
+function setupOpenIconKeydownHandler(e) {
+  switch (e.keyCode) {
+    case key.ENTER:
+      setupShow()
+      break
+  }
+}
+
+function setupKeydownHandler(e) {
+  switch (e.keyCode) {
+    case key.ESC:
+      if (document.activeElement !==
+          document.querySelector('.setup-user-name')) {
+        setupHide()
+      }
+      break
+  }
+}
+
+function setupCloseClickHandler(e) {
+  setupHide()
+}
+
+function setupCloseKeydownkHandler(e) {
+  switch (e.keyCode) {
+    case key.ENTER:
+      setupHide()
+      break
+  }
+}
+
+function setupSubmitClickHandler(e) {
+  // setupDataSubmit()
+}
+
+function setupSubmitKeydownkHandler(e) {
+  switch (e.keyCode) {
+    case key.ENTER:
+      // setupDataSubmit()
+      break
+  }
+}
+// реакции (конец)
+
+// действия (начало)
+function setupShow() {
+  document.querySelector('.setup').classList.remove('hidden')
+  document.querySelector('.setup-user-name').focus()
+}
+
+function setupHide() {
+  document.querySelector('.setup').classList.add('hidden')
+  document.querySelector('.setup-open-icon').focus()
+}
+
+function setupDataSubmit() {
+  console.log('setupDataSubmit')
+}
+// действия (конец)
+
+function main0() {
   document.querySelector('.setup').classList.remove('hidden')
   const wizards = createRandomWizards(4)
   const wizardElements = []
