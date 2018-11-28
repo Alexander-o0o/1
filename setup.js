@@ -3,6 +3,25 @@ const key = {
   ESC: 27,
   ENTER: 13,
 }
+
+const EYES_COLORS = [
+  'black',
+  'red',
+  'blue',
+  'yellow',
+  'green',
+]
+
+const mapType = {
+  PROPERTY: 1,
+  ATTRIBUTE: 2,
+  STYLE: 3,
+  ADD_STYLE: 4,
+}
+
+const SETUP_WIZADR = createRandomWizard()
+const SETUP_FIREBALL = { color: '#ee4830' }
+
 main1()
 
 function main1() {
@@ -26,8 +45,25 @@ function main1() {
 
   document.querySelector('.setup-submit')
       .addEventListener('keydown', setupSubmitKeydownkHandler)
+
+  document.querySelector('.setup-wizard .wizard-eyes')
+      .addEventListener('click', wizardEyesClickHandler)
+
+  document.querySelector('.setup-fireball-wrap')
+      .addEventListener('click', setupFireballWrapClickHandler)
 }
 // реакции (начало)
+function documentKeydownHandler(e) {
+  switch (e.keyCode) {
+    case key.ESC:
+      if (document.activeElement !==
+          document.querySelector('.setup-user-name')) {
+        setupHide()
+      }
+      break
+  }
+}
+
 function setupOpenClickHandler(e) {
   setupShow()
 }
@@ -41,14 +77,7 @@ function setupOpenIconKeydownHandler(e) {
 }
 
 function setupKeydownHandler(e) {
-  switch (e.keyCode) {
-    case key.ESC:
-      if (document.activeElement !==
-          document.querySelector('.setup-user-name')) {
-        setupHide()
-      }
-      break
-  }
+  console.log('setupKeydownHandler')
 }
 
 function setupCloseClickHandler(e) {
@@ -64,27 +93,91 @@ function setupCloseKeydownkHandler(e) {
 }
 
 function setupSubmitClickHandler(e) {
-  // setupDataSubmit()
+  setupDataSubmit()
 }
 
 function setupSubmitKeydownkHandler(e) {
   switch (e.keyCode) {
     case key.ENTER:
-      // setupDataSubmit()
+      setupDataSubmit()
       break
   }
+}
+
+function wizardEyesClickHandler(e) {
+  changeWizardEyesColor()
+}
+
+function setupFireballWrapClickHandler(e) {
+  changeFifeballColor()
 }
 // реакции (конец)
 
 // действия (начало)
 function setupShow() {
   document.querySelector('.setup').classList.remove('hidden')
-  document.querySelector('.setup-user-name').focus()
+  document.addEventListener('keydown', documentKeydownHandler)
+  fillSetup()
 }
 
 function setupHide() {
   document.querySelector('.setup').classList.add('hidden')
   document.querySelector('.setup-open-icon').focus()
+  document.removeEventListener('keydown', documentKeydownHandler)
+}
+
+function fillSetup() {
+  renderWizard()
+  renderFireball()
+}
+
+function changeWizardEyesColor() {
+  SETUP_WIZADR.eyesColor = loopOverArray(EYES_COLORS, SETUP_WIZADR.eyesColor)
+  renderWizard()
+}
+
+function renderWizard() {
+  const ObjectElementMap = [
+    {
+      source: 'coatColor',
+      selector: '.wizard-coat',
+      target: 'fill',
+      type: mapType.ATTRIBUTE,
+    },
+    {
+      source: 'eyesColor',
+      selector: '.wizard-eyes',
+      target: 'fill',
+      type: mapType.ATTRIBUTE,
+    },
+  ]
+  const container = document.querySelector('.setup-wizard')
+  mapObjectOnElement(SETUP_WIZADR, container, ObjectElementMap)
+}
+
+function changeFifeballColor() {
+  const colors = [
+    '#ee4830',
+    '#30a8ee',
+    '#5ce6c0',
+    '#e848d5',
+    '#e6e848',
+  ]
+  SETUP_FIREBALL.color = loopOverArray(colors, SETUP_FIREBALL.color)
+  renderFireball()
+}
+
+function renderFireball() {
+  const ObjectElementMap = [
+    {
+      source: 'color',
+      selector: '.setup-fireball',
+      target: 'background',
+      type: mapType.STYLE,
+    },
+  ]
+  const container = document.querySelector('.setup-fireball-wrap')
+  mapObjectOnElement(SETUP_FIREBALL, container, ObjectElementMap)
 }
 
 function setupDataSubmit() {
@@ -92,7 +185,8 @@ function setupDataSubmit() {
 }
 // действия (конец)
 
-function main0() {
+function module3task1() {
+  // create and show random similar wizards
   document.querySelector('.setup').classList.remove('hidden')
   const wizards = createRandomWizards(4)
   const wizardElements = []
@@ -111,11 +205,6 @@ function appendChilds(element, childs) {
 }
 
 function createWizardElement(wizard) {
-  const mapType = {
-    PROPERTY: 1,
-    ATTRIBUTE: 2,
-    STYLE: 3,
-  }
   const ObjectElementMap = [
     {
       source: 'name',
@@ -139,27 +228,33 @@ function createWizardElement(wizard) {
   const template = document.querySelector('#similar-wizard-template')
       .content.querySelector('div').cloneNode(true)
   mapObjectOnElement(wizard, template, ObjectElementMap)
-  function mapObjectOnElement(object, element, map) {
-    map.forEach((i) => {
-      const e = element.querySelector(i.selector)
-      if (i.source in object && e) {
-        switch (i.type) {
-          case mapType.PROPERTY:
-            e[i.target] = object[i.source]
-            break
-          case mapType.ATTRIBUTE:
-            e.setAttribute(i.target, object[i.source])
-            break
-          case mapType.STYLE:
-            e.style += ' ' + i.target + ':' + object[i.source] + ';'
-            break
-          default:
-            break
-        }
-      }
-    })
-  }
   return template
+}
+
+function mapObjectOnElement(object, element, map) {
+  map.forEach((i) => {
+    const e = element.querySelector(i.selector)
+    if (i.source in object && e) {
+      switch (i.type) {
+        case mapType.PROPERTY:
+          e[i.target] = object[i.source]
+          break
+        case mapType.ATTRIBUTE:
+          e.setAttribute(i.target, object[i.source])
+          break
+        case mapType.STYLE:
+        case mapType.ADD_STYLE:
+          let style
+          if ((i.type) === mapType.ADD_STYLE) {
+            style = e.getAttribute('style')
+          }
+          style = style ? style + '; ' : ''
+          e.setAttribute('style',
+              style + i.target + ':' + object[i.source] + ';')
+          break
+      }
+    }
+  })
 }
 
 function createRandomWizards(wizarsCount) {
@@ -179,14 +274,7 @@ function createRandomWizard() {
 }
 
 function randomEyesColor() {
-  const colors = [
-    'black',
-    'red',
-    'blue',
-    'yellow',
-    'green',
-  ]
-  return getRandomArrayElement(colors)
+  return getRandomArrayElement(EYES_COLORS)
 }
 
 function randomCoatColor() {
@@ -229,4 +317,15 @@ function randomWizardName() {
 
 function getRandomArrayElement(a) {
   return a[Math.floor(Math.random() * a.length)]
+}
+
+function loopOverArray(array, currentItem) {
+  let result
+  const i = array.indexOf(currentItem)
+  if (i === array.length - 1) {
+    result = array[0]
+  } else {
+    result = array[i + 1]
+  }
+  return result
 }

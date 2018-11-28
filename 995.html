@@ -63,13 +63,13 @@
 </header>
 
 <div class="overlay setup hidden">
-  <form class="setup-wizard-form">
+  <form class="setup-wizard-form" action="" method="post" enctype="multipart/form-data">
 
     <div class="setup-title">
       <div class="setup-user">
         <img class="setup-user-pic" src="995_data/user-1.jpg">
         <label>
-          <input type="text" class="setup-user-name" value="Синий Пендальф" required="" minlength="2" maxlength="50">
+          <input type="text" class="setup-user-name" value="Синий Пендальф" required="" minlength="2" maxlength="50" pattern=".{2,25}">
         </label>
       </div>
 
