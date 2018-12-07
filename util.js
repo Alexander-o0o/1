@@ -7,18 +7,27 @@
       STYLE: 3,
       ADD_STYLE: 4,
     },
+    // TODO: change ..Element on ..Item
     getRandomArrayElement: function(a) {
       return a[Math.floor(Math.random() * a.length)]
     },
-    loopOverArray: function(array, currentItem) {
+    loopOverArray: function(a, currentItem) {
       let result
-      const i = array.indexOf(currentItem)
-      if (i === array.length - 1) {
-        result = array[0]
+      const i = a.indexOf(currentItem)
+      if (i === a.length - 1) {
+        result = a[0]
       } else {
-        result = array[i + 1]
+        result = a[i + 1]
       }
       return result
+    },
+    // TODO: change ..Elements on ..Items
+    getUniqueElements: function(a) {
+      return a.map((i, index) => {
+        if (a.indexOf(i, index + 1) === -1) {
+          return i
+        }
+      })
     },
     mapObjectOnElement: function(object, element, map) {
       map.forEach((i) => {
@@ -45,10 +54,54 @@
         }
       })
     },
+    getAssociatedElements: function(element, map) {
+      const result = []
+      map.forEach((i) => {
+        if (this.isInNodeList(
+            element, document.querySelectorAll(i.a))) {
+          document.querySelectorAll(i.b).forEach((j) => {
+            result.push(j)
+          })
+        }
+      })
+      return this.getUniqueElements(result)
+    },
+    isMyPrecursor: function(element, precursor) {
+      let e = element.parentElement
+      do {
+        if (e === precursor) {
+          return true
+        }
+        e = e.parentElement
+      } while (e)
+      return false
+    },
     appendChilds: function(element, childs) {
       const fragment = document.createDocumentFragment()
       childs.forEach((i) => {fragment.appendChild(i)})
       element.appendChild(fragment)
+    },
+    classAddNeat: function(element, cssClass) {
+      if (!element.classList.contains(cssClass)) {
+        element.classList.add(cssClass)
+      }
+    },
+    classRemoveNeat: function(element, cssClass) {
+      if (element.classList.contains(cssClass)) {
+        element.classList.remove(cssClass)
+        if (element.classList.length === 0) {
+          element.removeAttribute('class')
+        }
+      }
+    },
+    moveElement: function(element, target) {
+      if (element !== target) {
+        target.appendChild(element)
+        // element.parentElement.removeChild(element)
+      }
+    },
+    isInNodeList: function(element, nodeList) {
+      return Array.prototype.indexOf.call(nodeList, element) !== -1
     },
   }
 }())

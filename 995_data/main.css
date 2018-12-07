@@ -870,3 +870,11 @@ input[type=radio]:checked + .review-mark-label {
   left: 0;
   top: 0;
 }
+
+.drag-allowed-target {
+  outline: 2px dashed red;
+}
+
+.drag-current-target {
+  outline: 2px dashed yellow;
+}

@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 (function() {
-  const util = window.util
+  const utilModule = window.util
   const EYES_COLORS = [
     'black',
     'red',
@@ -12,7 +12,7 @@
   const SETUP_FIREBALL = { color: '#ee4830' }
   window.setup = {
     changeWizardEyesColor: function() {
-      SETUP_WIZADR.eyesColor = util.loopOverArray(
+      SETUP_WIZADR.eyesColor = utilModule.loopOverArray(
           EYES_COLORS, SETUP_WIZADR.eyesColor)
       this.renderWizard()
     },
@@ -24,7 +24,7 @@
         '#e848d5',
         '#e6e848',
       ]
-      SETUP_FIREBALL.color = util.loopOverArray(
+      SETUP_FIREBALL.color = utilModule.loopOverArray(
           colors, SETUP_FIREBALL.color)
       this.renderFireball()
     },
@@ -34,17 +34,17 @@
           source: 'coatColor',
           selector: '.wizard-coat',
           target: 'fill',
-          type: util.mapType.ATTRIBUTE,
+          type: utilModule.mapType.ATTRIBUTE,
         },
         {
           source: 'eyesColor',
           selector: '.wizard-eyes',
           target: 'fill',
-          type: util.mapType.ATTRIBUTE,
+          type: utilModule.mapType.ATTRIBUTE,
         },
       ]
       const container = document.querySelector('.setup-wizard')
-      util.mapObjectOnElement(
+      utilModule.mapObjectOnElement(
           SETUP_WIZADR, container, ObjectElementMap)
     },
     renderFireball: function() {
@@ -53,14 +53,16 @@
           source: 'color',
           selector: '.setup-fireball',
           target: 'background',
-          type: util.mapType.STYLE,
+          type: utilModule.mapType.STYLE,
         },
       ]
       const container = document.querySelector('.setup-fireball-wrap')
-      util.mapObjectOnElement(
+      utilModule.mapObjectOnElement(
           SETUP_FIREBALL, container, ObjectElementMap)
     },
   }
+
+  // eslint-disable-next-line no-unused-vars
   function module3task1() {
     // create and show random similar wizards
     document.querySelector('.setup').classList.remove('hidden')
@@ -70,9 +72,10 @@
       wizardElements.push(createWizardElement(i))
     })
     const setupSimilarList = document.querySelector('.setup-similar-list')
-    util.appendChilds(setupSimilarList, wizardElements)
+    utilModule.appendChilds(setupSimilarList, wizardElements)
     document.querySelector('.setup-similar').classList.remove('hidden')
   }
+  // =========== random generation (start) =====================
   function createRandomWizards(wizarsCount) {
     const result = []
     for (let i = 0; i < wizarsCount; i++) {
@@ -88,7 +91,7 @@
     }
   }
   function randomEyesColor() {
-    return util.getRandomArrayElement(EYES_COLORS)
+    return utilModule.getRandomArrayElement(EYES_COLORS)
   }
   function randomCoatColor() {
     const colors = [
@@ -99,7 +102,7 @@
       'rgb(215, 210, 55)',
       'rgb(0, 0, 0)',
     ]
-    return util.getRandomArrayElement(colors)
+    return utilModule.getRandomArrayElement(colors)
   }
   function randomWizardName() {
     const firstNames = [
@@ -122,8 +125,8 @@
       'Нионго',
       'Ирвинг',
     ]
-    const name = util.getRandomArrayElement(firstNames) +
-    ' ' + util.getRandomArrayElement(surnames)
+    const name = utilModule.getRandomArrayElement(firstNames) +
+    ' ' + utilModule.getRandomArrayElement(surnames)
     return name
   }
   function createWizardElement(wizard) {
@@ -132,25 +135,26 @@
         source: 'name',
         selector: '.setup-similar-label',
         target: 'textContent',
-        type: util.mapType.PROPERTY,
+        type: utilModule.mapType.PROPERTY,
       },
       {
         source: 'coatColor',
         selector: '.wizard-coat',
         target: 'fill',
-        type: util.mapType.ATTRIBUTE,
+        type: utilModule.mapType.ATTRIBUTE,
       },
       {
         source: 'eyesColor',
         selector: '.wizard-eyes',
         target: 'fill',
-        type: util.mapType.ATTRIBUTE,
+        type: utilModule.mapType.ATTRIBUTE,
       },
     ]
     const template = document.querySelector('#similar-wizard-template')
         .content.querySelector('div').cloneNode(true)
-    util.mapObjectOnElement(wizard, template, ObjectElementMap)
+    utilModule.mapObjectOnElement(wizard, template, ObjectElementMap)
     return template
   }
+  // =========== random generation (end) =======================
   // module3task1()
 }())
