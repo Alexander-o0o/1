@@ -10,7 +10,7 @@
     ALLOEWD_TARGET: 'drag-allowed-target',
     CURRENT_TARGET: 'drag-current-target',
   }
-  let DRAGGED_ELEMENT
+  let DRAGGED_ARTIFACT
   let CURSOR_ATTACHED_ELEMENT
   const SETUP_INITIAL_INLINE_STYLES = document.querySelector('.setup').style
   function addEventListeners() {
@@ -22,9 +22,6 @@
     // =========== setup drag & drop (start) ===================
     document.querySelector('.setup')
         .addEventListener('dragstart', setupDragstartHandler)
-
-    document.querySelector('.setup')
-        .addEventListener('drag', setupDragHandler)
 
     document.querySelector('.setup')
         .addEventListener('dragenter', setupDragenterHandler)
@@ -73,60 +70,52 @@
 
     // =========== setup drag & drop (start) ===================
     function setupDragstartHandler(e) {
-      if (utilModule.isInNodeList(e.target,
-          document.querySelectorAll('.setup-artifacts-cell img'))) {
-        DRAGGED_ELEMENT = e.target
-        highlightAllowedTargetsContainers(getAllowedDragContainers())
+      startArtifactDragging(e.target)
+      function startArtifactDragging(artifactElement) {
+        if (isArtifact(artifactElement)) {
+          DRAGGED_ARTIFACT = artifactElement
+          highlightAllowedTargetsContainers(getAllowedArtifactsContainers())
 
-        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
-          i.addEventListener('dragover', setupArtifactsCellDragoverHandler)
-        })
-      }
-    }
-    function setupDragHandler(e) {
-      if (e.target === document.querySelector('.setup-user-pic')) {
-        // console.log(e.movementX)
+          document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+            i.addEventListener('dragover', setupArtifactsCellDragoverHandler)
+          })
+        }
       }
     }
     function setupDragenterHandler(e) {
-      if (utilModule.isInNodeList(DRAGGED_ELEMENT,
-          document.querySelectorAll('.setup-artifacts-cell img'))) {
+      if (isArtifact(DRAGGED_ARTIFACT)) {
         highlightCurrentDragTarget(e.target)
       }
     }
 
     function setupDragleaveHandler(e) {
-      if (utilModule.isInNodeList(DRAGGED_ELEMENT,
-          document.querySelectorAll('.setup-artifacts-cell img'))) {
+      if (isArtifact(DRAGGED_ARTIFACT)) {
         lowlightCurrentDragTarget(e.target)
       }
     }
 
     function setupDragendHandler(e) {
-      if (utilModule.isInNodeList(e.target,
-          document.querySelectorAll('.setup-artifacts-cell img'))) {
-        lowlightAllowedTargetsContainers()
-
-        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
-          i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
-        })
-        DRAGGED_ELEMENT = null
+      if (isArtifact(e.target)) {
+        endArtifactDragging()
       }
     }
 
     function setupDropHandler(e) {
-      if (utilModule.isInNodeList(e.target,
-          document.querySelectorAll('.setup-artifacts-cell'))) {
-        lowlightCurrentDragTarget(e.target)
+      if (isArtifactsCell(e.target)) {
         if (isAllowedDragTarget(e.target,
-            getAllowedDragContainers(DRAGGED_ELEMENT))) {
+            getAllowedArtifactsContainers(DRAGGED_ARTIFACT))) {
           moveDraggedElement(e.target)
         }
-        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
-          i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
-        })
-        DRAGGED_ELEMENT = null
+        endArtifactDragging()
       }
+    }
+    function endArtifactDragging() {
+      lowlightAllowedTargetsContainers()
+
+      document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+        i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
+      })
+      DRAGGED_ARTIFACT = null
     }
     // =========== setup drag & drop (end) =====================
     function setupUserPicMousedownHandler(e) {
@@ -203,7 +192,7 @@
     document.removeEventListener('keydown', documentKeydownHandler)
   }
   // =========== drag & drop (start) ===========================
-  function getAllowedDragContainers() {
+  function getAllowedArtifactsContainers() {
     const highlightRules = [
       {
         // if we dragged in this list
@@ -224,7 +213,7 @@
         b: '.setup-artifacts',
       },
     ]
-    return utilModule.getAssociatedElements(DRAGGED_ELEMENT, highlightRules)
+    return utilModule.getAssociatedElements(DRAGGED_ARTIFACT, highlightRules)
   }
   function isAllowedDragTarget(targetElement, allowedContainers) {
     for (let i = 0; i < allowedContainers.length; i++) {
@@ -258,7 +247,14 @@
         dragHighlightClasses.CURRENT_TARGET)
   }
   function moveDraggedElement(targetElement) {
-    utilModule.moveElement(DRAGGED_ELEMENT, targetElement)
+    utilModule.moveElement(DRAGGED_ARTIFACT, targetElement)
+  }
+  function isArtifact(element) {
+    return utilModule.isInNodeList(element,
+        document.querySelectorAll('.setup-artifacts-cell img'))
+  }
+  function isArtifactsCell(element) {
+    return element.classList.contains('setup-artifacts-cell')
   }
   // =========== drag & drop (end) =============================
   function attachToCursor(element) {
