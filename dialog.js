@@ -11,17 +11,9 @@
     CURRENT_TARGET: 'drag-current-target',
   }
   let DRAGGED_ELEMENT
+  let CURSOR_ATTACHED_ELEMENT
+  const SETUP_INITIAL_INLINE_STYLES = document.querySelector('.setup').style
   function addEventListeners() {
-    document.addEventListener('visibilitychange', function(e) {
-      if (e.target.defaultView === null &&
-          e.target.hidden === true &&
-          e.target.location === null &&
-          e.target.mozFullScreenEnabled === false &&
-          e.target.visibilityState === 'hidden') {
-        e.preventDefault()
-      }
-    })
-
     document.querySelector('.setup-open')
         .addEventListener('click', setupOpenClickHandler)
 
@@ -35,6 +27,9 @@
         .addEventListener('dragstart', setupDragstartHandler)
 
     document.querySelector('.setup')
+        .addEventListener('drag', setupDragHandler)
+
+    document.querySelector('.setup')
         .addEventListener('dragenter', setupDragenterHandler)
 
     document.querySelector('.setup')
@@ -45,16 +40,15 @@
 
     document.querySelector('.setup')
         .addEventListener('drop', setupDropHandler)
-    // =========== setup drag & drop (start) ===================
+    // =========== setup drag & drop (end) =====================
+    document.querySelector('.setup-user-pic')
+        .addEventListener('mousedown', setupUserPicMousedownHandler)
+
     document.querySelector('.setup-close')
         .addEventListener('click', setupCloseClickHandler)
 
     document.querySelector('.setup-close')
         .addEventListener('keydown', setupCloseKeydownkHandler)
-
-    document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
-      i.addEventListener('dragover', setupArtifactsCellDragoverHandler)
-    })
 
     document.querySelector('.setup-wizard .wizard-eyes')
         .addEventListener('click', wizardEyesClickHandler)
@@ -84,30 +78,68 @@
     }
     // =========== setup drag & drop (start) ===================
     function setupDragstartHandler(e) {
-      DRAGGED_ELEMENT = e.target
-      highlightAllowedDragTargets(getAllowedDragContainers())
-    }
+      console.log('ds')
+      if (utilModule.isInNodeList(e.target,
+          document.querySelectorAll('.setup-artifacts-cell img'))) {
+        DRAGGED_ELEMENT = e.target
+        highlightAllowedDragTargets(getAllowedDragContainers())
 
+        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+          i.addEventListener('dragover', setupArtifactsCellDragoverHandler)
+        })
+      }
+    }
+    function setupDragHandler(e) {
+      if (e.target === document.querySelector('.setup-user-pic')) {
+        // console.log(e.movementX)
+      }
+    }
     function setupDragenterHandler(e) {
-      highlightCurrentDragTarget(e.target)
+      if (utilModule.isInNodeList(DRAGGED_ELEMENT,
+          document.querySelectorAll('.setup-artifacts-cell img'))) {
+        highlightCurrentDragTarget(e.target)
+      }
     }
 
     function setupDragleaveHandler(e) {
-      lowlightCurrentDragTarget(e.target)
+      if (utilModule.isInNodeList(DRAGGED_ELEMENT,
+          document.querySelectorAll('.setup-artifacts-cell img'))) {
+        lowlightCurrentDragTarget(e.target)
+      }
     }
 
     function setupDragendHandler(e) {
-      lowlightAllowedDragTargets()
+      console.log('de')
+      if (utilModule.isInNodeList(e.target,
+          document.querySelectorAll('.setup-artifacts-cell img'))) {
+        lowlightAllowedDragTargets()
+
+        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+          i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
+        })
+        DRAGGED_ELEMENT = null
+      }
     }
 
     function setupDropHandler(e) {
-      lowlightCurrentDragTarget(e.target)
-      if (isAllowedDragTarget(e.target,
-          getAllowedDragContainers(DRAGGED_ELEMENT))) {
-        moveDraggedElement(e.target)
+      if (utilModule.isInNodeList(e.target,
+          document.querySelectorAll('.setup-artifacts-cell'))) {
+        lowlightCurrentDragTarget(e.target)
+        if (isAllowedDragTarget(e.target,
+            getAllowedDragContainers(DRAGGED_ELEMENT))) {
+          moveDraggedElement(e.target)
+        }
+        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+          i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
+        })
+        DRAGGED_ELEMENT = null
       }
     }
-    // =========== setup drag & drop (start) ===================
+    // =========== setup drag & drop (end) =====================
+    function setupUserPicMousedownHandler(e) {
+      attachToCursor(document.querySelector('.setup'))
+    }
+
     function setupCloseClickHandler(e) {
       setupHide()
     }
@@ -119,7 +151,7 @@
           break
       }
     }
-
+    // additional setup drag & drop
     function setupArtifactsCellDragoverHandler(e) {
       e.preventDefault()
     }
@@ -144,6 +176,17 @@
       }
     }
   }
+  function documentMousemoveHandler(e) {
+    // console.log('m')
+    if (CURSOR_ATTACHED_ELEMENT) {
+      moveAttachedElement(e.movementX, e.movementY)
+    }
+  }
+  function documentMouseupHandler() {
+    if (CURSOR_ATTACHED_ELEMENT) {
+      detachFromCursor()
+    }
+  }
   function documentKeydownHandler(e) {
     switch (e.keyCode) {
       case key.ESC:
@@ -155,7 +198,9 @@
     }
   }
   function setupShow() {
-    document.querySelector('.setup').classList.remove('hidden')
+    const setupElement = document.querySelector('.setup')
+    setupElement.style = SETUP_INITIAL_INLINE_STYLES
+    setupElement.classList.remove('hidden')
     document.addEventListener('keydown', documentKeydownHandler)
     fillSetup()
   }
@@ -222,6 +267,29 @@
     utilModule.moveElement(DRAGGED_ELEMENT, targetElement)
   }
   // =========== drag & drop (end) =============================
+  function attachToCursor(element) {
+    console.log('s')
+    CURSOR_ATTACHED_ELEMENT = element
+
+    element.style.setProperty('position', 'absolute')
+    element.style.setProperty('transtorm', 'none')
+    element.style.setProperty('left', element.offsetLeft + 'px')
+    element.style.setProperty('top', element.offsetTop + 'px')
+
+    document.addEventListener('mousemove', documentMousemoveHandler)
+    document.addEventListener('mouseup', documentMouseupHandler)
+  }
+  function moveAttachedElement(movementX, movementY) {
+    CURSOR_ATTACHED_ELEMENT.style.setProperty('left',
+        CURSOR_ATTACHED_ELEMENT.offsetLeft + movementX + 'px')
+    CURSOR_ATTACHED_ELEMENT.style.setProperty('top',
+        CURSOR_ATTACHED_ELEMENT.offsetTop + movementY + 'px')
+  }
+  function detachFromCursor() {
+    CURSOR_ATTACHED_ELEMENT = null
+    document.removeEventListener('mousemove', documentMousemoveHandler)
+    document.removeEventListener('mouseup', documentMouseupHandler)
+  }
   function setupDataSubmit() {
   }
   function fillSetup() {
