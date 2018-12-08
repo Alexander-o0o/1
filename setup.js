@@ -1,6 +1,10 @@
 /* eslint-disable require-jsdoc */
 (function() {
   const utilModule = window.util
+  const dragHighlightClasses = {
+    ALLOEWD_TARGET: 'drag-allowed-target',
+    CURRENT_TARGET: 'drag-current-target',
+  }
   const EYES_COLORS = [
     'black',
     'red',
@@ -10,7 +14,37 @@
   ]
   const SETUP_WIZADR = createRandomWizard()
   const SETUP_FIREBALL = { color: '#ee4830' }
+  let ARTIFACT_ELEMENT
   window.setup = {
+    highlightCurrentDragTarget: function(targetElement) {
+      utilModule.classAddNeat(targetElement,
+          dragHighlightClasses.CURRENT_TARGET)
+    },
+    lowlightCurrentDragTarget: function(targetElement) {
+      utilModule.classRemoveNeat(targetElement,
+          dragHighlightClasses.CURRENT_TARGET)
+    },
+    isArtifact: function(element) {
+      return utilModule.isInNodeList(element,
+          document.querySelectorAll('.setup-artifacts-cell img'))
+    },
+    isArtifactsCell: function(element) {
+      return element.classList.contains('setup-artifacts-cell')
+    },
+    startArtifactDragging: function(artifactElement) {
+      ARTIFACT_ELEMENT = artifactElement
+      highlightAllowedTargetsContainers(getAllowedArtifactsContainers())
+    },
+    endArtifactDragging: function(targetElement) {
+      lowlightAllowedTargetsContainers()
+      ARTIFACT_ELEMENT = null
+    },
+    completeArtifactDragging: function(targetElement) {
+      if (isAllowedDragTarget(targetElement,
+          getAllowedArtifactsContainers(ARTIFACT_ELEMENT))) {
+        moveDraggedElement(targetElement)
+      }
+    },
     changeWizardEyesColor: function() {
       SETUP_WIZADR.eyesColor = utilModule.loopOverArray(
           EYES_COLORS, SETUP_WIZADR.eyesColor)
@@ -61,7 +95,57 @@
           SETUP_FIREBALL, container, ObjectElementMap)
     },
   }
-
+  // =========== drag & drop (start) ===========================
+  function getAllowedArtifactsContainers() {
+    const highlightRules = [
+      {
+        // if we dragged in this list
+        a: '.setup-artifacts-shop img',
+        // then add that list to return
+        b: '.setup-artifacts',
+      },
+      {
+        a: '.setup-artifacts-shop img',
+        b: '.setup-artifacts-shop',
+      },
+      {
+        a: '.setup-artifacts img',
+        b: '.setup-artifacts-shop',
+      },
+      {
+        a: '.setup-artifacts img',
+        b: '.setup-artifacts',
+      },
+    ]
+    return utilModule.getAssociatedElements(ARTIFACT_ELEMENT, highlightRules)
+  }
+  function isAllowedDragTarget(targetElement, allowedContainers) {
+    for (let i = 0; i < allowedContainers.length; i++) {
+      if (utilModule.isMyPrecursor(targetElement, allowedContainers[i])) {
+        return true
+      }
+    }
+    return false
+  }
+  function highlightAllowedTargetsContainers(containersElements) {
+    containersElements.forEach((i) => {
+      highlightAllowedTargetsContainer(i)
+    })
+  }
+  function highlightAllowedTargetsContainer(containerElement) {
+    utilModule.classAddNeat(containerElement,
+        dragHighlightClasses.ALLOEWD_TARGET)
+  }
+  function lowlightAllowedTargetsContainers() {
+    document.querySelectorAll('.' + dragHighlightClasses.ALLOEWD_TARGET)
+        .forEach((i) => {
+          utilModule.classRemoveNeat(i, dragHighlightClasses.ALLOEWD_TARGET)
+        })
+  }
+  function moveDraggedElement(targetElement) {
+    utilModule.moveElement(ARTIFACT_ELEMENT, targetElement)
+  }
+  // =========== drag & drop (end) =============================
   // eslint-disable-next-line no-unused-vars
   function module3task1() {
     // create and show random similar wizards
@@ -126,7 +210,7 @@
       'Ирвинг',
     ]
     const name = utilModule.getRandomArrayElement(firstNames) +
-    ' ' + utilModule.getRandomArrayElement(surnames)
+      ' ' + utilModule.getRandomArrayElement(surnames)
     return name
   }
   function createWizardElement(wizard) {

@@ -1,16 +1,11 @@
 /* eslint-disable require-jsdoc */
 (function() {
   const setupModule = window.setup
-  const utilModule = window.util
   const key = {
     ESC: 27,
     ENTER: 13,
   }
-  const dragHighlightClasses = {
-    ALLOEWD_TARGET: 'drag-allowed-target',
-    CURRENT_TARGET: 'drag-current-target',
-  }
-  let DRAGGED_ARTIFACT
+  let DRAGGED_ELEMENT
   let CURSOR_ATTACHED_ELEMENT
   const SETUP_INITIAL_INLINE_STYLES = document.querySelector('.setup').style
   function addEventListeners() {
@@ -19,7 +14,7 @@
 
     document.querySelector('.setup-open-icon')
         .addEventListener('keydown', setupOpenIconKeydownHandler)
-    // =========== setup drag & drop (start) ===================
+    // ========= drag & drop (start) ===========================
     document.querySelector('.setup')
         .addEventListener('dragstart', setupDragstartHandler)
 
@@ -34,7 +29,7 @@
 
     document.querySelector('.setup')
         .addEventListener('drop', setupDropHandler)
-    // =========== setup drag & drop (end) =====================
+    // ========= drag & drop (start) ===========================
     document.querySelector('.setup-user-pic')
         .addEventListener('mousedown', setupUserPicMousedownHandler)
 
@@ -59,7 +54,6 @@
     function setupOpenClickHandler(e) {
       setupShow()
     }
-
     function setupOpenIconKeydownHandler(e) {
       switch (e.keyCode) {
         case key.ENTER:
@@ -67,65 +61,56 @@
           break
       }
     }
-
-    // =========== setup drag & drop (start) ===================
+    // ========= drag & drop (start) ===========================
     function setupDragstartHandler(e) {
-      startArtifactDragging(e.target)
-      function startArtifactDragging(artifactElement) {
-        if (isArtifact(artifactElement)) {
-          DRAGGED_ARTIFACT = artifactElement
-          highlightAllowedTargetsContainers(getAllowedArtifactsContainers())
+      DRAGGED_ELEMENT = e.target
+      if (setupModule.isArtifact(e.target)) {
+        setupModule.startArtifactDragging(e.target)
 
-          document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
-            i.addEventListener('dragover', setupArtifactsCellDragoverHandler)
-          })
-        }
+        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+          i.addEventListener('dragover', setupArtifactsCellDragoverHandler)
+        })
       }
     }
     function setupDragenterHandler(e) {
-      if (isArtifact(DRAGGED_ARTIFACT)) {
-        highlightCurrentDragTarget(e.target)
+      if (setupModule.isArtifact(DRAGGED_ELEMENT)) {
+        setupModule.highlightCurrentDragTarget(e.target)
       }
     }
-
     function setupDragleaveHandler(e) {
-      if (isArtifact(DRAGGED_ARTIFACT)) {
-        lowlightCurrentDragTarget(e.target)
+      if (setupModule.isArtifact(DRAGGED_ELEMENT)) {
+        setupModule.lowlightCurrentDragTarget(e.target)
       }
     }
-
     function setupDragendHandler(e) {
-      if (isArtifact(e.target)) {
-        endArtifactDragging()
-      }
-    }
+      if (setupModule.isArtifact(e.target)) {
+        setupModule.endArtifactDragging()
 
+        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+          i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
+        })
+      }
+      DRAGGED_ELEMENT = null
+    }
     function setupDropHandler(e) {
-      if (isArtifactsCell(e.target)) {
-        if (isAllowedDragTarget(e.target,
-            getAllowedArtifactsContainers(DRAGGED_ARTIFACT))) {
-          moveDraggedElement(e.target)
-        }
-        endArtifactDragging()
+      if (setupModule.isArtifactsCell(e.target)) {
+        setupModule.completeArtifactDragging(e.target)
+        setupModule.endArtifactDragging()
+        setupModule.lowlightCurrentDragTarget(e.target)
+
+        document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
+          i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
+        })
       }
     }
-    function endArtifactDragging() {
-      lowlightAllowedTargetsContainers()
-
-      document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
-        i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
-      })
-      DRAGGED_ARTIFACT = null
-    }
-    // =========== setup drag & drop (end) =====================
+    // ========= drag & drop (end) =============================
+    // move window
     function setupUserPicMousedownHandler(e) {
       attachToCursor(document.querySelector('.setup'))
     }
-
     function setupCloseClickHandler(e) {
       setupHide()
     }
-
     function setupCloseKeydownkHandler(e) {
       switch (e.keyCode) {
         case key.ENTER:
@@ -133,23 +118,19 @@
           break
       }
     }
-    // additional setup drag & drop
+    // additional drag & drop
     function setupArtifactsCellDragoverHandler(e) {
       e.preventDefault()
     }
-
     function wizardEyesClickHandler(e) {
       setupModule.changeWizardEyesColor()
     }
-
     function setupFireballWrapClickHandler(e) {
       setupModule.changeFifeballColor()
     }
-
     function setupSubmitClickHandler(e) {
       setupDataSubmit()
     }
-
     function setupSubmitKeydownkHandler(e) {
       switch (e.keyCode) {
         case key.ENTER:
@@ -191,72 +172,7 @@
     document.querySelector('.setup-open-icon').focus()
     document.removeEventListener('keydown', documentKeydownHandler)
   }
-  // =========== drag & drop (start) ===========================
-  function getAllowedArtifactsContainers() {
-    const highlightRules = [
-      {
-        // if we dragged in this list
-        a: '.setup-artifacts-shop img',
-        // then add that list to return
-        b: '.setup-artifacts',
-      },
-      {
-        a: '.setup-artifacts-shop img',
-        b: '.setup-artifacts-shop',
-      },
-      {
-        a: '.setup-artifacts img',
-        b: '.setup-artifacts-shop',
-      },
-      {
-        a: '.setup-artifacts img',
-        b: '.setup-artifacts',
-      },
-    ]
-    return utilModule.getAssociatedElements(DRAGGED_ARTIFACT, highlightRules)
-  }
-  function isAllowedDragTarget(targetElement, allowedContainers) {
-    for (let i = 0; i < allowedContainers.length; i++) {
-      if (utilModule.isMyPrecursor(targetElement, allowedContainers[i])) {
-        return true
-      }
-    }
-    return false
-  }
-  function highlightAllowedTargetsContainers(containersElements) {
-    containersElements.forEach((i) => {
-      highlightAllowedTargetsContainer(i)
-    })
-  }
-  function highlightAllowedTargetsContainer(containerElement) {
-    utilModule.classAddNeat(containerElement,
-        dragHighlightClasses.ALLOEWD_TARGET)
-  }
-  function lowlightAllowedTargetsContainers() {
-    document.querySelectorAll('.' + dragHighlightClasses.ALLOEWD_TARGET)
-        .forEach((i) => {
-          utilModule.classRemoveNeat(i, dragHighlightClasses.ALLOEWD_TARGET)
-        })
-  }
-  function highlightCurrentDragTarget(targetElement) {
-    utilModule.classAddNeat(targetElement,
-        dragHighlightClasses.CURRENT_TARGET)
-  }
-  function lowlightCurrentDragTarget(targetElement) {
-    utilModule.classRemoveNeat(targetElement,
-        dragHighlightClasses.CURRENT_TARGET)
-  }
-  function moveDraggedElement(targetElement) {
-    utilModule.moveElement(DRAGGED_ARTIFACT, targetElement)
-  }
-  function isArtifact(element) {
-    return utilModule.isInNodeList(element,
-        document.querySelectorAll('.setup-artifacts-cell img'))
-  }
-  function isArtifactsCell(element) {
-    return element.classList.contains('setup-artifacts-cell')
-  }
-  // =========== drag & drop (end) =============================
+  // =========== move mouse (start) ============================
   function attachToCursor(element) {
     CURSOR_ATTACHED_ELEMENT = element
 
@@ -279,6 +195,7 @@
     document.removeEventListener('mousemove', documentMousemoveHandler)
     document.removeEventListener('mouseup', documentMouseupHandler)
   }
+  // =========== move mouse (end) ==============================
   function setupDataSubmit() {
   }
   function fillSetup() {
