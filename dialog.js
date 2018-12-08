@@ -19,9 +19,6 @@
 
     document.querySelector('.setup-open-icon')
         .addEventListener('keydown', setupOpenIconKeydownHandler)
-
-    document.querySelector('.setup')
-        .addEventListener('keydown', setupKeydownHandler)
     // =========== setup drag & drop (start) ===================
     document.querySelector('.setup')
         .addEventListener('dragstart', setupDragstartHandler)
@@ -74,15 +71,12 @@
       }
     }
 
-    function setupKeydownHandler(e) {
-    }
     // =========== setup drag & drop (start) ===================
     function setupDragstartHandler(e) {
-      console.log('ds')
       if (utilModule.isInNodeList(e.target,
           document.querySelectorAll('.setup-artifacts-cell img'))) {
         DRAGGED_ELEMENT = e.target
-        highlightAllowedDragTargets(getAllowedDragContainers())
+        highlightAllowedTargetsContainers(getAllowedDragContainers())
 
         document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
           i.addEventListener('dragover', setupArtifactsCellDragoverHandler)
@@ -109,10 +103,9 @@
     }
 
     function setupDragendHandler(e) {
-      console.log('de')
       if (utilModule.isInNodeList(e.target,
           document.querySelectorAll('.setup-artifacts-cell img'))) {
-        lowlightAllowedDragTargets()
+        lowlightAllowedTargetsContainers()
 
         document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
           i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
@@ -241,15 +234,15 @@
     }
     return false
   }
-  function highlightAllowedDragTargets(targetElements) {
+  function highlightAllowedTargetsContainers(targetElements) {
     targetElements.forEach((i) => {
-      highlightAllowedDragTarget(i)
+      highlightAllowedTargetsContainer(i)
     })
   }
-  function highlightAllowedDragTarget(targetElement) {
+  function highlightAllowedTargetsContainer(targetElement) {
     utilModule.classAddNeat(targetElement, dragHighlightClasses.ALLOEWD_TARGET)
   }
-  function lowlightAllowedDragTargets() {
+  function lowlightAllowedTargetsContainers() {
     document.querySelectorAll('.' + dragHighlightClasses.ALLOEWD_TARGET)
         .forEach((i) => {
           utilModule.classRemoveNeat(i, dragHighlightClasses.ALLOEWD_TARGET)
@@ -268,7 +261,6 @@
   }
   // =========== drag & drop (end) =============================
   function attachToCursor(element) {
-    console.log('s')
     CURSOR_ATTACHED_ELEMENT = element
 
     element.style.setProperty('position', 'absolute')
