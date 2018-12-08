@@ -234,13 +234,14 @@
     }
     return false
   }
-  function highlightAllowedTargetsContainers(targetElements) {
-    targetElements.forEach((i) => {
+  function highlightAllowedTargetsContainers(containersElements) {
+    containersElements.forEach((i) => {
       highlightAllowedTargetsContainer(i)
     })
   }
-  function highlightAllowedTargetsContainer(targetElement) {
-    utilModule.classAddNeat(targetElement, dragHighlightClasses.ALLOEWD_TARGET)
+  function highlightAllowedTargetsContainer(containerElement) {
+    utilModule.classAddNeat(containerElement,
+        dragHighlightClasses.ALLOEWD_TARGET)
   }
   function lowlightAllowedTargetsContainers() {
     document.querySelectorAll('.' + dragHighlightClasses.ALLOEWD_TARGET)
