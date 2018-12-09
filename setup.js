@@ -17,18 +17,12 @@
   let ARTIFACT_ELEMENT
   window.setup = {
     highlightCurrentDragTarget: function(targetElement) {
-      if (isInsideAllowedContainer(targetElement,
-          getAllowedArtifactsContainers())) {
-        utilModule.classAddNeat(targetElement,
-            dragHighlightClasses.CURRENT_TARGET)
-      }
+      utilModule.classAddNeat(targetElement,
+          dragHighlightClasses.CURRENT_TARGET)
     },
     lowlightCurrentDragTarget: function(targetElement) {
-      if (isInsideAllowedContainer(targetElement,
-          getAllowedArtifactsContainers())) {
-        utilModule.classRemoveNeat(targetElement,
-            dragHighlightClasses.CURRENT_TARGET)
-      }
+      utilModule.classRemoveNeat(targetElement,
+          dragHighlightClasses.CURRENT_TARGET)
     },
     isArtifact: function(element) {
       return utilModule.isInNodeList(element,

@@ -79,12 +79,14 @@
       }
     }
     function setupDragenterHandler(e) {
-      if (setupModule.isArtifact(DRAGGED_ELEMENT)) {
+      if (setupModule.isArtifact(DRAGGED_ELEMENT) &&
+          setupModule.isArtifactsCell(e.target)) {
         setupModule.highlightCurrentDragTarget(e.target)
       }
     }
     function setupDragleaveHandler(e) {
-      if (setupModule.isArtifact(DRAGGED_ELEMENT)) {
+      if (setupModule.isArtifact(DRAGGED_ELEMENT) &&
+      setupModule.isArtifactsCell(e.target)) {
         setupModule.lowlightCurrentDragTarget(e.target)
       }
     }
