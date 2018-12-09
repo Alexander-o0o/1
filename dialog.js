@@ -8,6 +8,12 @@
   let DRAGGED_ELEMENT
   let CURSOR_ATTACHED_ELEMENT
   const SETUP_INITIAL_INLINE_STYLES = document.querySelector('.setup').style
+  function init() {
+    addEventListeners()
+    document.querySelectorAll('.setup-artifacts-cell img').forEach((i) => {
+      i.setAttribute('draggable', 'true')
+    })
+  }
   function addEventListeners() {
     document.querySelector('.setup-open')
         .addEventListener('click', setupOpenClickHandler)
@@ -96,7 +102,6 @@
       if (setupModule.isArtifactsCell(e.target)) {
         setupModule.completeArtifactDragging(e.target)
         setupModule.endArtifactDragging()
-        setupModule.lowlightCurrentDragTarget(e.target)
 
         document.querySelectorAll('.setup-artifacts-cell').forEach((i) => {
           i.removeEventListener('dragover', setupArtifactsCellDragoverHandler)
@@ -172,7 +177,7 @@
     document.querySelector('.setup-open-icon').focus()
     document.removeEventListener('keydown', documentKeydownHandler)
   }
-  // =========== move mouse (start) ============================
+  // =========== move window (start) ===========================
   function attachToCursor(element) {
     CURSOR_ATTACHED_ELEMENT = element
 
@@ -195,12 +200,12 @@
     document.removeEventListener('mousemove', documentMousemoveHandler)
     document.removeEventListener('mouseup', documentMouseupHandler)
   }
-  // =========== move mouse (end) ==============================
+  // =========== move window (end) =============================
   function setupDataSubmit() {
   }
   function fillSetup() {
     setupModule.renderWizard()
     setupModule.renderFireball()
   }
-  addEventListeners()
+  init()
 }())

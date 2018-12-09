@@ -17,12 +17,18 @@
   let ARTIFACT_ELEMENT
   window.setup = {
     highlightCurrentDragTarget: function(targetElement) {
-      utilModule.classAddNeat(targetElement,
-          dragHighlightClasses.CURRENT_TARGET)
+      if (isInsideAllowedContainer(targetElement,
+          getAllowedArtifactsContainers())) {
+        utilModule.classAddNeat(targetElement,
+            dragHighlightClasses.CURRENT_TARGET)
+      }
     },
     lowlightCurrentDragTarget: function(targetElement) {
-      utilModule.classRemoveNeat(targetElement,
-          dragHighlightClasses.CURRENT_TARGET)
+      if (isInsideAllowedContainer(targetElement,
+          getAllowedArtifactsContainers())) {
+        utilModule.classRemoveNeat(targetElement,
+            dragHighlightClasses.CURRENT_TARGET)
+      }
     },
     isArtifact: function(element) {
       return utilModule.isInNodeList(element,
@@ -40,9 +46,18 @@
       ARTIFACT_ELEMENT = null
     },
     completeArtifactDragging: function(targetElement) {
-      if (isAllowedDragTarget(targetElement,
-          getAllowedArtifactsContainers(ARTIFACT_ELEMENT))) {
-        moveDraggedElement(targetElement)
+      if (isInsideAllowedContainer(targetElement,
+          getAllowedArtifactsContainers())) {
+        if (ARTIFACT_ELEMENT.parentNode.parentNode
+            .classList.contains('setup-artifacts-shop') &&
+        targetElement.parentNode
+            .classList.contains('setup-artifacts')) {
+          utilModule.cloneElement(ARTIFACT_ELEMENT, targetElement)
+        } else {
+          utilModule.moveElement(ARTIFACT_ELEMENT, targetElement)
+        }
+        utilModule.classRemoveNeat(targetElement,
+            dragHighlightClasses.CURRENT_TARGET)
       }
     },
     changeWizardEyesColor: function() {
@@ -119,9 +134,13 @@
     ]
     return utilModule.getAssociatedElements(ARTIFACT_ELEMENT, highlightRules)
   }
-  function isAllowedDragTarget(targetElement, allowedContainers) {
+  function isInsideAllowedContainer(targetElement, allowedContainers) {
     for (let i = 0; i < allowedContainers.length; i++) {
-      if (utilModule.isMyPrecursor(targetElement, allowedContainers[i])) {
+      if (targetElement.children.length > 0) {
+        return false
+      }
+      if (utilModule.getDistanceToPrecursor(targetElement,
+          allowedContainers[i]) === 1) {
         return true
       }
     }
@@ -141,9 +160,6 @@
         .forEach((i) => {
           utilModule.classRemoveNeat(i, dragHighlightClasses.ALLOEWD_TARGET)
         })
-  }
-  function moveDraggedElement(targetElement) {
-    utilModule.moveElement(ARTIFACT_ELEMENT, targetElement)
   }
   // =========== drag & drop (end) =============================
   // eslint-disable-next-line no-unused-vars

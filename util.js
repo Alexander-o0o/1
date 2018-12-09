@@ -66,15 +66,17 @@
       })
       return this.getUniqueElements(result)
     },
-    isMyPrecursor: function(element, precursor) {
+    getDistanceToPrecursor: function(element, precursor) {
+      let result = 0
       let e = element.parentElement
       do {
+        result++
         if (e === precursor) {
-          return true
+          return result
         }
         e = e.parentElement
       } while (e)
-      return false
+      return 0
     },
     appendChilds: function(element, childs) {
       const fragment = document.createDocumentFragment()
@@ -97,7 +99,11 @@
     moveElement: function(element, target) {
       if (element !== target) {
         target.appendChild(element)
-        // element.parentElement.removeChild(element)
+      }
+    },
+    cloneElement: function(element, target) {
+      if (element !== target) {
+        target.appendChild(element.cloneNode(true))
       }
     },
     isInNodeList: function(element, nodeList) {
