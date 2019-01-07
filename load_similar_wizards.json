@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Виктор Мирабелла",
+    "coatColor": "rgb(146, 100, 161)",
+    "eyesColor": "green"
+  },
+  {
+    "name": "Виктор Топольницкая",
+    "coatColor": "rgb(56, 159, 117)",
+    "eyesColor": "yellow"
+  },
+  {
+    "name": "Вашингтон Вальц",
+    "coatColor": "rgb(0, 0, 0)",
+    "eyesColor": "blue"
+  },
+  {
+    "name": "Вашингтон Топольницкая",
+    "coatColor": "rgb(0, 0, 0)",
+    "eyesColor": "yellow"
+  },
+  {
+    "name": "Хуан Себастьян Топольницкая",
+    "coatColor": "rgb(241, 43, 107)",
+    "eyesColor": "green"
+  },
+  {
+    "name": "Вашингтон Нионго",
+    "coatColor": "rgb(146, 100, 161)",
+    "eyesColor": "red"
+  },
+  {
+    "name": "Вашингтон Онопко",
+    "coatColor": "rgb(241, 43, 107)",
+    "eyesColor": "yellow"
+  },
+  {
+    "name": "Люпита Верон",
+    "coatColor": "rgb(215, 210, 55)",
+    "eyesColor": "blue"
+  },
+  {
+    "name": "Иван Топольницкая",
+    "coatColor": "rgb(241, 43, 107)",
+    "eyesColor": "black"
+  },
+  {
+    "name": "Мария Ирвинг",
+    "coatColor": "rgb(0, 0, 0)",
+    "eyesColor": "yellow"
+  }
+]

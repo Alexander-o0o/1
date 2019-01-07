@@ -35,9 +35,15 @@
 
     document.querySelector('.setup')
         .addEventListener('drop', setupDropHandler)
-    // ========= drag & drop (start) ===========================
+    // ========= drag & drop (end) =============================
+    document.querySelector('.setup')
+        .addEventListener('submit', setupSubmitHandler)
+
     document.querySelector('.setup-user-pic')
         .addEventListener('mousedown', setupUserPicMousedownHandler)
+
+    document.querySelector('.setup-user-name')
+        .addEventListener('change', setupUserNameChangeHandler)
 
     document.querySelector('.setup-close')
         .addEventListener('click', setupCloseClickHandler)
@@ -50,12 +56,6 @@
 
     document.querySelector('.setup-fireball-wrap')
         .addEventListener('click', setupFireballWrapClickHandler)
-
-    document.querySelector('.setup-submit')
-        .addEventListener('click', setupSubmitClickHandler)
-
-    document.querySelector('.setup-submit')
-        .addEventListener('keydown', setupSubmitKeydownkHandler)
 
     function setupOpenClickHandler(e) {
       setupShow()
@@ -111,9 +111,16 @@
       }
     }
     // ========= drag & drop (end) =============================
+    function setupSubmitHandler(e) {
+      e.preventDefault()
+      setupDataSubmit(e)
+    }
     // move window
     function setupUserPicMousedownHandler(e) {
       attachToCursor(document.querySelector('.setup'))
+    }
+    function setupUserNameChangeHandler(e) {
+      setupModule.setSettingsWizardName()
     }
     function setupCloseClickHandler(e) {
       setupHide()
@@ -134,16 +141,6 @@
     }
     function setupFireballWrapClickHandler(e) {
       setupModule.changeFifeballColor()
-    }
-    function setupSubmitClickHandler(e) {
-      setupDataSubmit()
-    }
-    function setupSubmitKeydownkHandler(e) {
-      switch (e.keyCode) {
-        case key.ENTER:
-          setupDataSubmit()
-          break
-      }
     }
   }
   function documentMousemoveHandler(e) {
@@ -168,16 +165,18 @@
     }
   }
   function setupShow() {
-    const setupElement = document.querySelector('.setup')
-    setupElement.style = SETUP_INITIAL_INLINE_STYLES
-    setupElement.classList.remove('hidden')
+    document.querySelector('.setup').classList.remove('hidden')
     document.addEventListener('keydown', documentKeydownHandler)
-    fillSetup()
+    setupModule.asyncLoadSettings(fillSetup)
   }
   function setupHide() {
-    document.querySelector('.setup').classList.add('hidden')
+    const setupElement = document.querySelector('.setup')
+    setupElement.classList.add('hidden')
+    setupElement.style = SETUP_INITIAL_INLINE_STYLES
     document.querySelector('.setup-open-icon').focus()
     document.removeEventListener('keydown', documentKeydownHandler)
+    setupModule.hideSimilarWizards()
+    setupModule.clearSimilarWizards()
   }
   // =========== move window (start) ===========================
   function attachToCursor(element) {
@@ -203,11 +202,14 @@
     document.removeEventListener('mouseup', documentMouseupHandler)
   }
   // =========== move window (end) =============================
-  function setupDataSubmit() {
+  function setupDataSubmit(e) {
+    setupModule.asyncSaveSettings(setupHide)
   }
   function fillSetup() {
+    setupModule.fillTextData()
     setupModule.renderWizard()
     setupModule.renderFireball()
+    setupModule.asyncShowSimilarWizards()
   }
   init()
 }())

@@ -1,6 +1,7 @@
 /* eslint-disable require-jsdoc */
 (function() {
   const utilModule = window.util
+  const backendModule = window.backend
   const dragHighlightClasses = {
     ALLOEWD_TARGET: 'drag-allowed-target',
     CURRENT_TARGET: 'drag-current-target',
@@ -12,10 +13,19 @@
     'yellow',
     'green',
   ]
-  const SETUP_WIZADR = createRandomWizard()
-  const SETUP_FIREBALL = { color: '#ee4830' }
+  const FIREBALL_COLORS = [
+    '#ee4830',
+    '#30a8ee',
+    '#5ce6c0',
+    '#e848d5',
+    '#e6e848',
+  ]
+  let SETTINGS
+  // eslint-disable-next-line prefer-const
+  let SIMILAR_WIZARDS = []
   let ARTIFACT_ELEMENT
   window.setup = {
+    // ========= drag & drop (start) ===========================
     highlightCurrentDragTarget: function(targetElement) {
       utilModule.classAddNeat(targetElement,
           dragHighlightClasses.CURRENT_TARGET)
@@ -54,22 +64,90 @@
             dragHighlightClasses.CURRENT_TARGET)
       }
     },
+    // ========= drag & drop (end) =============================
+    setSettingsWizardName() {
+      SETTINGS.WIZARD.name = document.querySelector('.setup-user-name').value
+    },
+    clearSimilarWizards() {
+      SIMILAR_WIZARDS = []
+    },
+    isSettingsLoaded: function() {
+      return SETTINGS !== undefined
+    },
+    asyncLoadSettings: function(onLoadCallback) {
+      // Remember: statements in onLoad run one after another immediately
+      function onLoad(e) {
+        checkXHRStatus(e)
+        SETTINGS = JSON.parse(e.target.responseText) || randomSettings()
+        onLoadCallback()
+      }
+      function onError(e) {
+        SETTINGS = randomSettings()
+        onLoadCallback()
+        onXHRError(e)
+      }
+      try {
+        backendModule.loadSettings(
+            utilModule.safeInvoke.bind(null, onLoad),
+            utilModule.safeInvoke.bind(null, onError))
+      } catch (e) {
+        console.error(e.message)
+      }
+    },
+    asyncSaveSettings: function(onSaveCallback) {
+      this.setSettingsWizardName()
+      function onSave(e) {
+        onSaveCallback()
+        checkXHRStatus(e)
+      }
+      function onError(e) {
+        onSaveCallback()
+        onXHRError(e)
+      }
+      try {
+        backendModule.save(SETTINGS,
+            utilModule.safeInvoke.bind(null, onSave),
+            utilModule.safeInvoke.bind(null, onError))
+      } catch (e) {
+        console.error(e.message)
+      }
+    },
+    asyncShowSimilarWizards() {
+      function onLoad(e) {
+        loadSimilarWizards(e)
+        showSimilarWizards()
+        checkXHRStatus(e)
+      }
+      function onError(e) {
+        onXHRError(e)
+      }
+      try {
+        backendModule.load(
+            utilModule.safeInvoke.bind(null, onLoad),
+            utilModule.safeInvoke.bind(null, onError))
+      } catch (e) {
+        console.error(e.message)
+      }
+    },
+    hideSimilarWizards: function() {
+      document.querySelector('.setup-similar').classList.remove('hidden')
+      const setupSimilarList = document.querySelector('.setup-similar-list')
+      utilModule.removeChildNodes(setupSimilarList, 1)
+    },
     changeWizardEyesColor: function() {
-      SETUP_WIZADR.eyesColor = utilModule.loopOverArray(
-          EYES_COLORS, SETUP_WIZADR.eyesColor)
+      SETTINGS.WIZARD.eyesColor = utilModule.loopOverArray(
+          EYES_COLORS, SETTINGS.WIZARD.eyesColor)
       this.renderWizard()
+      showSimilarWizards()
     },
     changeFifeballColor: function() {
-      const colors = [
-        '#ee4830',
-        '#30a8ee',
-        '#5ce6c0',
-        '#e848d5',
-        '#e6e848',
-      ]
-      SETUP_FIREBALL.color = utilModule.loopOverArray(
-          colors, SETUP_FIREBALL.color)
+      SETTINGS.FIREBALL.color = utilModule.loopOverArray(
+          FIREBALL_COLORS, SETTINGS.FIREBALL.color)
       this.renderFireball()
+    },
+    // ========= render (start) ================================
+    fillTextData: function() {
+      document.querySelector('.setup-user-name').value = SETTINGS.WIZARD.name
     },
     renderWizard: function() {
       const ObjectElementMap = [
@@ -77,18 +155,18 @@
           source: 'coatColor',
           selector: '.wizard-coat',
           target: 'fill',
-          type: utilModule.mapType.ATTRIBUTE,
+          type: utilModule.mapType.STYLE,
         },
         {
           source: 'eyesColor',
           selector: '.wizard-eyes',
           target: 'fill',
-          type: utilModule.mapType.ATTRIBUTE,
+          type: utilModule.mapType.STYLE,
         },
       ]
       const container = document.querySelector('.setup-wizard')
       utilModule.mapObjectOnElement(
-          SETUP_WIZADR, container, ObjectElementMap)
+          SETTINGS.WIZARD, container, ObjectElementMap)
     },
     renderFireball: function() {
       const ObjectElementMap = [
@@ -101,8 +179,18 @@
       ]
       const container = document.querySelector('.setup-fireball-wrap')
       utilModule.mapObjectOnElement(
-          SETUP_FIREBALL, container, ObjectElementMap)
+          SETTINGS.FIREBALL, container, ObjectElementMap)
     },
+    // ========= render (end) ==================================
+  }
+  function onXHRError(e) {
+    const out = e.message || e.error || e.target.statusText || 'unknown error'
+    throw new Error(out)
+  }
+  function checkXHRStatus(e) {
+    if (e.target.status > 299) {
+      throw new Error(e.target.statusText)
+    }
   }
   // =========== drag & drop (start) ===========================
   function getAllowedArtifactsContainers() {
@@ -156,20 +244,59 @@
         })
   }
   // =========== drag & drop (end) =============================
-  // eslint-disable-next-line no-unused-vars
-  function module3task1() {
-    // create and show random similar wizards
-    document.querySelector('.setup').classList.remove('hidden')
-    const wizards = createRandomWizards(4)
-    const wizardElements = []
-    wizards.forEach((i) => {
-      wizardElements.push(createWizardElement(i))
-    })
+  function loadSimilarWizards(e) {
+    const data = JSON.parse(e.target.responseText)
+    const randomUniqueInt = utilModule.randomUniqueInt(data.length)
+    const wizardsMax = 4
+    for (let i = 0; i < wizardsMax; i++) {
+      SIMILAR_WIZARDS.push(data[randomUniqueInt()])
+    }
+  }
+  function showSimilarWizards() {
+    const wizardsMax = 4
     const setupSimilarList = document.querySelector('.setup-similar-list')
-    utilModule.appendChilds(setupSimilarList, wizardElements)
-    document.querySelector('.setup-similar').classList.remove('hidden')
+    const wizards = SIMILAR_WIZARDS.slice(0, wizardsMax)
+    let wizardsElements
+    // может быть так только хуже и я всё лишь усложняю.
+    // может быть лучше по простому - всё удалить и создать занова,
+    // а не обновлять.
+    if (setupSimilarList.children.length === 0) {
+      wizardsElements = wizards.map((i) => createWizardElement(i))
+      utilModule.appendChilds(setupSimilarList, wizardsElements)
+      document.querySelector('.setup-similar').classList.remove('hidden')
+    } else {
+      wizardsElements =
+          Array.from(document.querySelectorAll('.setup-similar-item'))
+      wizards.forEach((item, index) => {
+        updateWizardElement(item, wizardsElements[index])
+      })
+    }
+  }
+  
+  // eslint-disable-next-line no-unused-vars
+  function readSettings() {
+    return {
+      WIZARD: {
+        name: document.querySelector('.setup-user-name').value,
+        coatColor: document.querySelector('.wizard-coat').style.fill,
+        eyesColor: document.querySelector('.wizard-eyes').style.fill,
+      },
+      FIREBALL: { color: document.querySelector('.setup-fireball')
+          .style.background },
+    }
+  }
+  function randomSettings() {
+    return {
+      WIZARD: {
+        name: document.querySelector('.setup-user-name').value,
+        coatColor: randomCoatColor(),
+        eyesColor: randomEyesColor(),
+      },
+      FIREBALL: { color: utilModule.getRandomArrayElement(FIREBALL_COLORS) },
+    }
   }
   // =========== random generation (start) =====================
+  // eslint-disable-next-line no-unused-vars
   function createRandomWizards(wizarsCount) {
     const result = []
     for (let i = 0; i < wizarsCount; i++) {
@@ -250,5 +377,27 @@
     return template
   }
   // =========== random generation (end) =======================
-  // module3task1()
+  function updateWizardElement(wizard, element) {
+    const ObjectElementMap = [
+      {
+        source: 'name',
+        selector: '.setup-similar-label',
+        target: 'textContent',
+        type: utilModule.mapType.PROPERTY,
+      },
+      {
+        source: 'coatColor',
+        selector: '.wizard-coat',
+        target: 'fill',
+        type: utilModule.mapType.ATTRIBUTE,
+      },
+      {
+        source: 'eyesColor',
+        selector: '.wizard-eyes',
+        target: 'fill',
+        type: utilModule.mapType.ATTRIBUTE,
+      },
+    ]
+    utilModule.mapObjectOnElement(wizard, element, ObjectElementMap)
+  }
 }())

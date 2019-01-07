@@ -29,6 +29,11 @@
         }
       })
     },
+    removeChildNodes: function(element, childIndex) {
+      while (element.childNodes[childIndex]) {
+        element.removeChild(element.lastChild)
+      }
+    },
     mapObjectOnElement: function(object, element, map) {
       map.forEach((i) => {
         const e = element.querySelector(i.selector)
@@ -108,6 +113,31 @@
     },
     isInNodeList: function(element, nodeList) {
       return Array.prototype.indexOf.call(nodeList, element) !== -1
+    },
+    randomUniqueInt: function(max) {
+      // можно было сделать не функцию, а объект randomUniqueInt,
+      // но захотелось так
+      let values = []
+      for (let i = 0; i < max; i++) {
+        values.push(i)
+      }
+      return function cutRandomArrayElement() {
+        const rndI = Math.floor(Math.random() * values.length)
+        const result = values[rndI]
+        // удаляем этот элемент из массива
+        values = values.slice(0, rndI).concat(values.slice(rndI + 1))
+        return result
+      }
+    },
+    safeInvoke: function(f) {
+      try {
+        // eslint-disable-next-line prefer-rest-params
+        const args = Array.prototype.slice.call(arguments)
+        // eslint-disable-next-line prefer-spread
+        f.apply(null, args.slice(1))
+      } catch (e) {
+        console.error(e.message)
+      }
     },
   }
 }())
