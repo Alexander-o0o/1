@@ -6,6 +6,14 @@
     ALLOEWD_TARGET: 'drag-allowed-target',
     CURRENT_TARGET: 'drag-current-target',
   }
+  const COAT_COLORS = [
+    'rgb(101, 137, 164)',
+    'rgb(241, 43, 107)',
+    'rgb(146, 100, 161)',
+    'rgb(56, 159, 117)',
+    'rgb(215, 210, 55)',
+    'rgb(0, 0, 0)',
+  ]
   const EYES_COLORS = [
     'black',
     'red',
@@ -21,7 +29,6 @@
     '#e6e848',
   ]
   let SETTINGS
-  // eslint-disable-next-line prefer-const
   let SIMILAR_WIZARDS = []
   let ARTIFACT_ELEMENT
   window.setup = {
@@ -115,6 +122,7 @@
     asyncShowSimilarWizards() {
       function onLoad(e) {
         loadSimilarWizards(e)
+        sortSimilarWizards()
         showSimilarWizards()
         checkXHRStatus(e)
       }
@@ -134,10 +142,18 @@
       const setupSimilarList = document.querySelector('.setup-similar-list')
       utilModule.removeChildNodes(setupSimilarList, 1)
     },
+    changeWizardCoatColor: function() {
+      SETTINGS.WIZARD.coatColor = utilModule.loopOverArray(
+          COAT_COLORS, SETTINGS.WIZARD.coatColor)
+      this.renderWizard()
+      sortSimilarWizards()
+      showSimilarWizards()
+    },
     changeWizardEyesColor: function() {
       SETTINGS.WIZARD.eyesColor = utilModule.loopOverArray(
           EYES_COLORS, SETTINGS.WIZARD.eyesColor)
       this.renderWizard()
+      sortSimilarWizards()
       showSimilarWizards()
     },
     changeFifeballColor: function() {
@@ -245,12 +261,28 @@
   }
   // =========== drag & drop (end) =============================
   function loadSimilarWizards(e) {
-    const data = JSON.parse(e.target.responseText)
-    const randomUniqueInt = utilModule.randomUniqueInt(data.length)
-    const wizardsMax = 4
-    for (let i = 0; i < wizardsMax; i++) {
-      SIMILAR_WIZARDS.push(data[randomUniqueInt()])
+    // const data = JSON.parse(e.target.responseText)
+    // const randomUniqueInt = utilModule.randomUniqueInt(data.length)
+    // const wizardsMax = 4
+    // for (let i = 0; i < wizardsMax; i++) {
+    //   SIMILAR_WIZARDS.push(data[randomUniqueInt()])
+    // }
+    SIMILAR_WIZARDS = JSON.parse(e.target.responseText)
+  }
+  function sortSimilarWizards(eyesColor, coatColor) {
+    SIMILAR_WIZARDS.sort(function(a, b) {
+      return calculateWizardsSimilarity(SETTINGS.WIZARD, b) -
+          calculateWizardsSimilarity(SETTINGS.WIZARD, a)
+    })
+  }
+  function calculateWizardsSimilarity(wizardA, wizardB) {
+    let result = 0
+    for (const key in wizardA) {
+      if (wizardA[key] === wizardB[key]) {
+        result++
+      }
     }
+    return result
   }
   function showSimilarWizards() {
     const wizardsMax = 4
@@ -272,7 +304,6 @@
       })
     }
   }
-  
   // eslint-disable-next-line no-unused-vars
   function readSettings() {
     return {
@@ -315,15 +346,7 @@
     return utilModule.getRandomArrayElement(EYES_COLORS)
   }
   function randomCoatColor() {
-    const colors = [
-      'rgb(101, 137, 164)',
-      'rgb(241, 43, 107)',
-      'rgb(146, 100, 161)',
-      'rgb(56, 159, 117)',
-      'rgb(215, 210, 55)',
-      'rgb(0, 0, 0)',
-    ]
-    return utilModule.getRandomArrayElement(colors)
+    return utilModule.getRandomArrayElement(COAT_COLORS)
   }
   function randomWizardName() {
     const firstNames = [

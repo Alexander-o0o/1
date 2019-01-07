@@ -51,6 +51,9 @@
     document.querySelector('.setup-close')
         .addEventListener('keydown', setupCloseKeydownkHandler)
 
+    document.querySelector('.setup-wizard .wizard-coat')
+        .addEventListener('click', wizardCoatClickHandler)
+
     document.querySelector('.setup-wizard .wizard-eyes')
         .addEventListener('click', wizardEyesClickHandler)
 
@@ -135,6 +138,9 @@
     // additional drag & drop
     function setupArtifactsCellDragoverHandler(e) {
       e.preventDefault()
+    }
+    function wizardCoatClickHandler(e) {
+      setupModule.changeWizardCoatColor()
     }
     function wizardEyesClickHandler(e) {
       setupModule.changeWizardEyesColor()
