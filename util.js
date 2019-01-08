@@ -1,5 +1,6 @@
 /* eslint-disable require-jsdoc */
 (function() {
+  let FREQUENCY_RESTRICTED_INVOKES = []
   window.util = {
     mapType: {
       PROPERTY: 1,
@@ -139,5 +140,75 @@
         console.error(e.message)
       }
     },
+    /* Самый короткий и простой на мой взгляд вариант. Есть
+    конечно ещё вариант без таймера где в массив для каждой ф
+    записывается интервал игнорирования (time) и момент последнего
+    успешного запуска и если времени с этого момента прошло больше
+    чем этот интервал, то ф запускается. У варианта без таймера
+    есть небольшое преимущество - отсутствие некоторых ограничений
+    связанных с this в таймере. Но т.к. вариант без таймера пришел
+    мне в голову последним, принципиальных преимуществ в нём тут
+    я не вижу и сейчас его реализовывать мне лень, то будет этот
+    вариант:
+    */
+    debounce: function(time, f) {
+      // eslint-disable-next-line prefer-const
+      let a = FREQUENCY_RESTRICTED_INVOKES
+      if (a.indexOf(f) === -1) {
+        a.push(f)
+        setTimeout(() => {removeArrayElement(a, f)}, time)
+        // eslint-disable-next-line prefer-rest-params
+        const args = Array.prototype.slice.call(arguments, 2)
+        // eslint-disable-next-line prefer-spread
+        f.apply(null, args)
+      }
+    },
+    /* На мой взгляд, в короткой серии нажатий вариант с мгновенным
+    реагированием на первое нажатие и полным игнорированием после
+    этого воспринимается как более лагучий, чем вариант, когда по
+    завершении интервала последнее нажатие всё-таки срабатывает.
+    Разумеется пока интервал не слишком большой. Так что вот он:
+    */
+    // debounce: function(time, f) {
+    //   // big ugly alternative with deffered call
+    //   // eslint-disable-next-line prefer-const
+    //   let a = FREQUENCY_RESTRICTED_INVOKES
+    //   if (a.filter((i) => i.call === f).length === 0) {
+    //     a.push({ call: f, isDefferred: false, args: undefined })
+    //     const that = this
+    //     setTimeout(() => {
+    //       const aFiltered = a.filter((i) => i.call === f)
+    //       if (aFiltered.length > 0) {
+    //         removeArrayElement(a, aFiltered[0])
+    //         if (aFiltered[0].isDefferred) {
+    //           // eslint-disable-next-line prefer-spread
+    //           that.debounce.apply(that, aFiltered[0].args)
+    //         }
+    //       }
+    //     }, time)
+    //     // eslint-disable-next-line prefer-rest-params
+    //     const args = Array.prototype.slice.call(arguments, 2)
+    //     // eslint-disable-next-line prefer-spread
+    //     f.apply(null, args)
+    //     return true
+    //   } else {
+    //     const aFiltered = a.filter((i) => i.call === f)
+    //     if (aFiltered.length > 0) {
+    //       aFiltered[0].isDefferred = true
+    //       // eslint-disable-next-line prefer-rest-params
+    //       aFiltered[0].args = Array.prototype.slice.call(arguments, 0)
+    //     }
+    //     return false
+    //   }
+    // },
+  }
+  function removeArrayElement(a, e) {
+    const index = a.indexOf(e)
+    if (index !== -1) {
+      for (let i = index; i < a.length - 1; i++) {
+        a[i] = a[i + 1]
+      }
+      a.length--
+    }
   }
 }())

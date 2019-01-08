@@ -122,8 +122,7 @@
     asyncShowSimilarWizards() {
       function onLoad(e) {
         loadSimilarWizards(e)
-        sortSimilarWizards()
-        showSimilarWizards()
+        renderSimilarWizards()
         checkXHRStatus(e)
       }
       function onError(e) {
@@ -146,15 +145,13 @@
       SETTINGS.WIZARD.coatColor = utilModule.loopOverArray(
           COAT_COLORS, SETTINGS.WIZARD.coatColor)
       this.renderWizard()
-      sortSimilarWizards()
-      showSimilarWizards()
+      utilModule.debounce(500, renderSimilarWizards)
     },
     changeWizardEyesColor: function() {
       SETTINGS.WIZARD.eyesColor = utilModule.loopOverArray(
           EYES_COLORS, SETTINGS.WIZARD.eyesColor)
       this.renderWizard()
-      sortSimilarWizards()
-      showSimilarWizards()
+      utilModule.debounce(500, renderSimilarWizards)
     },
     changeFifeballColor: function() {
       SETTINGS.FIREBALL.color = utilModule.loopOverArray(
@@ -325,6 +322,10 @@
       },
       FIREBALL: { color: utilModule.getRandomArrayElement(FIREBALL_COLORS) },
     }
+  }
+  function renderSimilarWizards() {
+    sortSimilarWizards()
+    showSimilarWizards()
   }
   // =========== random generation (start) =====================
   // eslint-disable-next-line no-unused-vars
